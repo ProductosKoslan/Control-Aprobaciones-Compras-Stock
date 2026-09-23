@@ -217,7 +217,29 @@
   .form-actions{ display:flex; gap:10px; justify-content:flex-end; margin-top: 16px; }
 
   /* ---------- Tabla ---------- */
-  .table-wrap{ overflow-x:auto; }
+  .table-wrap{
+    overflow-x:auto;
+    /* Barra de desplazamiento siempre visible (en vez de la overlay oculta por
+       defecto), para que quede claro que hay más columnas hacia la derecha */
+    scrollbar-width: auto;
+    scrollbar-color: var(--ink-faint) #EEF1F0;
+    /* Sombra en los bordes que aparece solo cuando hay más contenido para
+       desplazar hacia ese lado (técnica CSS con dos fondos por lado: uno que
+       se desplaza con el contenido -tapa la sombra cuando no hace falta- y
+       otro fijo al viewport -la sombra en sí-). No requiere JavaScript. */
+    background:
+      linear-gradient(to right, var(--panel) 30%, rgba(255,255,255,0)) 0 0,
+      linear-gradient(to left, var(--panel) 30%, rgba(255,255,255,0)) 100% 0,
+      radial-gradient(farthest-side at 0 50%, rgba(28,43,51,0.18), rgba(28,43,51,0)) 0 0,
+      radial-gradient(farthest-side at 100% 50%, rgba(28,43,51,0.18), rgba(28,43,51,0)) 100% 0;
+    background-repeat: no-repeat;
+    background-size: 40px 100%, 40px 100%, 14px 100%, 14px 100%;
+    background-attachment: local, local, scroll, scroll;
+  }
+  .table-wrap::-webkit-scrollbar{ height: 11px; }
+  .table-wrap::-webkit-scrollbar-track{ background: #EEF1F0; }
+  .table-wrap::-webkit-scrollbar-thumb{ background: var(--ink-faint); border-radius: 6px; border: 2px solid #EEF1F0; }
+  .table-wrap::-webkit-scrollbar-thumb:hover{ background: var(--ink-soft); }
   table{ width:100%; border-collapse: collapse; min-width: 960px; table-layout: fixed; }
   #table-card-stock table{ min-width: 1180px; }
   thead th{
