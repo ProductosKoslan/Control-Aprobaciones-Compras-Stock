@@ -225,15 +225,26 @@
     scrollbar-color: var(--ink-faint) #EEF1F0;
     position: relative;
   }
-  /* Sombra fija en el borde derecho como pista de que hay más columnas para
-     desplazar (evitamos "background-attachment: local" en tablas: produce un
-     bug de renderizado que repite el degradado en cada fila). */
-  .table-wrap::after{
+  /* Sombra en los bordes como pista de que hay más columnas para desplazar.
+     Solo se muestra cuando la tabla realmente desborda (clase agregada por
+     JS), para no aparecer cuando todas las columnas ya caben en pantalla.
+     (Evitamos "background-attachment: local" en tablas: produce un bug de
+     renderizado que repite el degradado en cada fila.) */
+  .table-wrap::after, .table-wrap::before{
     content:"";
-    position:absolute; top:0; right:0; bottom: 11px; width: 18px;
-    pointer-events:none;
+    position:absolute; top:0; bottom: 11px; width: 18px;
+    pointer-events:none; opacity:0; transition: opacity .15s ease;
+  }
+  .table-wrap::after{
+    right:0;
     background: linear-gradient(to left, rgba(28,43,51,0.14), rgba(28,43,51,0));
   }
+  .table-wrap::before{
+    left:0; z-index:1;
+    background: linear-gradient(to right, rgba(28,43,51,0.14), rgba(28,43,51,0));
+  }
+  .table-wrap.has-overflow-right::after{ opacity:1; }
+  .table-wrap.has-overflow-left::before{ opacity:1; }
   .table-wrap::-webkit-scrollbar{ height: 11px; }
   .table-wrap::-webkit-scrollbar-track{ background: #EEF1F0; }
   .table-wrap::-webkit-scrollbar-thumb{ background: var(--ink-faint); border-radius: 6px; border: 2px solid #EEF1F0; }
@@ -1546,6 +1557,31 @@ document.getElementById("gen-ids-copy").addEventListener("click", async function
     ta.select();
   }
 });
+
+// Sombra de scroll horizontal: solo se muestra cuando la tabla realmente
+// desborda el ancho visible (y del lado que corresponda), para que no
+// aparezca cuando todas las columnas ya caben en pantalla.
+(function setupTableShadows(){
+  const wraps = document.querySelectorAll(".table-wrap");
+  wraps.forEach(function(wrap){
+    function update(){
+      const overflowRight = wrap.scrollWidth - wrap.clientWidth - wrap.scrollLeft > 2;
+      const overflowLeft = wrap.scrollLeft > 2;
+      wrap.classList.toggle("has-overflow-right", overflowRight);
+      wrap.classList.toggle("has-overflow-left", overflowLeft);
+    }
+    wrap.addEventListener("scroll", update);
+    window.addEventListener("resize", update);
+    if (window.ResizeObserver){
+      const ro = new ResizeObserver(update);
+      ro.observe(wrap);
+      const table = wrap.querySelector("table");
+      if (table) ro.observe(table);
+    }
+    wrap._updateTableShadow = update;
+    update();
+  });
+})();
 
 // "Compras para stock" es la vista por defecto: se carga de inmediato.
 loadStock();
