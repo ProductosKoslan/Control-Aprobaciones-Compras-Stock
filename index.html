@@ -298,7 +298,11 @@
   .accion-cell{ display:flex; gap:6px; align-items:center; }
 
   /* ---------- Reordenar prioridad arrastrando filas ---------- */
-  .prio-cell{ display:flex; align-items:center; gap:6px; }
+  /* Nota: el flex va en un <span> interno (.prio-inner), no directo en el
+     <td>, porque "display:flex" en el <td> lo saca del modelo de layout de
+     tabla y su borde inferior deja de alinearse con el resto de la fila
+     cuando otra celda tiene más altura (p.ej. texto en 2 líneas). */
+  .prio-inner{ display:flex; align-items:center; gap:6px; }
   .drag-handle{
     cursor: grab; color: var(--ink-faint); font-size: 14px; line-height:1;
     user-select:none; flex: 0 0 auto;
@@ -1132,10 +1136,10 @@ function renderStock(){
     const prioValue = (s.prioridad !== "" && s.prioridad !== null && s.prioridad !== undefined) ? s.prioridad : "—";
     const prioCell = canReorder
       ? '<span class="drag-handle" title="Arrastrar para reordenar">⠿</span><span>' + prioValue + '</span>'
-      : prioValue;
+      : '<span>' + prioValue + '</span>';
 
     tr.innerHTML = `
-      <td class="num prio-cell">${prioCell}</td>
+      <td class="num prio-cell"><span class="prio-inner">${prioCell}</span></td>
       <td class="truncate" title="${(s.proveedor||"").replace(/"/g,'&quot;')}">${s.proveedor || "—"}</td>
       <td class="amount-cell">${fmtAmount(s.montoOrigen, s.moneda)}</td>
       <td class="amount-cell">${fmtCLP(s.montoCLP)}</td>
