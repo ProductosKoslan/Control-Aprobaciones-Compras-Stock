@@ -223,18 +223,16 @@
        defecto), para que quede claro que hay más columnas hacia la derecha */
     scrollbar-width: auto;
     scrollbar-color: var(--ink-faint) #EEF1F0;
-    /* Sombra en los bordes que aparece solo cuando hay más contenido para
-       desplazar hacia ese lado (técnica CSS con dos fondos por lado: uno que
-       se desplaza con el contenido -tapa la sombra cuando no hace falta- y
-       otro fijo al viewport -la sombra en sí-). No requiere JavaScript. */
-    background:
-      linear-gradient(to right, var(--panel) 30%, rgba(255,255,255,0)) 0 0,
-      linear-gradient(to left, var(--panel) 30%, rgba(255,255,255,0)) 100% 0,
-      radial-gradient(farthest-side at 0 50%, rgba(28,43,51,0.18), rgba(28,43,51,0)) 0 0,
-      radial-gradient(farthest-side at 100% 50%, rgba(28,43,51,0.18), rgba(28,43,51,0)) 100% 0;
-    background-repeat: no-repeat;
-    background-size: 40px 100%, 40px 100%, 14px 100%, 14px 100%;
-    background-attachment: local, local, scroll, scroll;
+    position: relative;
+  }
+  /* Sombra fija en el borde derecho como pista de que hay más columnas para
+     desplazar (evitamos "background-attachment: local" en tablas: produce un
+     bug de renderizado que repite el degradado en cada fila). */
+  .table-wrap::after{
+    content:"";
+    position:absolute; top:0; right:0; bottom: 11px; width: 18px;
+    pointer-events:none;
+    background: linear-gradient(to left, rgba(28,43,51,0.14), rgba(28,43,51,0));
   }
   .table-wrap::-webkit-scrollbar{ height: 11px; }
   .table-wrap::-webkit-scrollbar-track{ background: #EEF1F0; }
